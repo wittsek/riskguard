@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { getAuthCallbackUrl } from '@/lib/supabase/siteUrl';
 import { SupabaseSetupMessage } from './SupabaseSetupMessage';
 
 type Mode = 'login' | 'register';
@@ -49,7 +50,7 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
         password,
         options: {
           data: fullName.trim() ? { full_name: fullName.trim() } : undefined,
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: getAuthCallbackUrl(process.env, window.location.origin),
         },
       });
       if (error) throw error;
@@ -81,7 +82,7 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: getAuthCallbackUrl(process.env, window.location.origin) },
       });
       if (error) throw error;
       setTone('ok');

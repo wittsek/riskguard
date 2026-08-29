@@ -73,11 +73,19 @@ Open [http://localhost:3000](http://localhost:3000). Drop a CSV or load the samp
 | Env | Required? | What it unlocks |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional | Login, cloud save |
+| `NEXT_PUBLIC_SITE_URL` | Optional on Vercel | Canonical origin for auth emails (`https://getriskguard.com`). Prevents confirmation links from pointing at localhost. |
 | `LLM_API_KEY` (or `OPENAI_API_KEY`) | Optional | LLM notes on `/api/coach` (else rule-based) |
 | `LLM_BASE_URL` + `LLM_MODEL` | Optional | Any OpenAI-compatible host (OpenRouter, Ollama, Groq, …). Required model if base URL is set. |
 | `TELEGRAM_BOT_TOKEN` | Optional | Alert after a saved audit + `/api/webhook/telegram` |
 
 Never commit `.env.local`. Restart the single `next dev` after changing env.
+
+On hosted login, set **Supabase → Authentication → URL configuration**:
+
+- Site URL: `https://getriskguard.com`
+- Redirect URLs: `https://getriskguard.com/auth/callback`, `https://www.getriskguard.com/auth/callback` (if you use www), and optionally `http://localhost:3000/auth/callback` for local work
+
+Then add `NEXT_PUBLIC_SITE_URL=https://getriskguard.com` on Vercel and redeploy. Old emails that already contain `localhost:3000` will not change — request a new confirmation from https://getriskguard.com/register.
 
 ```bash
 npm test
