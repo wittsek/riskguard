@@ -4,7 +4,7 @@
 
 Upload an MT4/MT5 CSV, see what revenge trades and missing stops actually cost you, and score a static prop-firm check. The leak calculator and the full linter run in the browser. No account required.
 
-Hosted product: [getriskguard.com](https://getriskguard.com) · [Pricing](https://getriskguard.com/pricing) · Source: [github.com/wittsek/ai-trading](https://github.com/wittsek/ai-trading)
+Hosted product: [getriskguard.com](https://getriskguard.com) · [Pricing](https://getriskguard.com/pricing) · Source: [github.com/wittsek/riskguard](https://github.com/wittsek/riskguard)
 
 **Open-core · [AGPLv3](./LICENSE).** Community is the full auditor. Pro is hosted convenience plus included AI. See [NOTICE](./NOTICE) for what is already open in this tree versus future hosted modules.
 

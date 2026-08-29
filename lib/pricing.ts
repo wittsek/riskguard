@@ -2,7 +2,7 @@
 
 export const SITE_DOMAIN = 'getriskguard.com';
 export const SUPPORT_EMAIL = 'hello@getriskguard.com';
-export const GITHUB_REPO_URL = 'https://github.com/wittsek/ai-trading';
+export const GITHUB_REPO_URL = 'https://github.com/wittsek/riskguard';
 export const OPEN_CORE_LABEL = 'Open-core · AGPL';
 
 export const PRO_MONTHLY_USD = 19;

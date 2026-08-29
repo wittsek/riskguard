@@ -59,7 +59,7 @@ describe('pricing copy constants', () => {
   });
 
   it('points Open-core AGPL at the public GitHub repo', () => {
-    expect(GITHUB_REPO_URL).toBe('https://github.com/wittsek/ai-trading');
+    expect(GITHUB_REPO_URL).toBe('https://github.com/wittsek/riskguard');
     expect(OPEN_CORE_LABEL).toMatch(/AGPL/i);
   });
 });
