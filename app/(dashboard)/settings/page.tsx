@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { TelegramAlertsCard } from '@/components/settings/TelegramAlertsCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PRICING_PATH } from '@/lib/pricing';
@@ -17,7 +18,7 @@ export default function SettingsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-zinc-500">Account and upcoming alert channels.</p>
+        <p className="text-sm text-zinc-500">Account and optional Telegram alerts.</p>
       </div>
 
       <Card>
@@ -51,17 +52,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Telegram alerts</CardTitle>
-          <CardDescription>Coming in a later slice. Chat ID will live on your profile.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-zinc-500">
-            Rule-break pings are not wired yet. The calculator and saved audits work without Telegram.
-          </p>
-        </CardContent>
-      </Card>
+      <TelegramAlertsCard />
     </div>
   );
 }

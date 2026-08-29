@@ -3,6 +3,7 @@ import { parseRunAuditAnnotations, parseRunAuditTrades } from '@/lib/persist/map
 import { persistLintedAudit } from '@/lib/persist/persistAudit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
+import { notifySavedAudit } from '@/lib/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
 
   try {
     const saved = await persistLintedAudit(supabase, user, parsed, annotations);
+    await notifySavedAudit(supabase, user.id, saved);
     return NextResponse.json(saved);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not save audit.';
