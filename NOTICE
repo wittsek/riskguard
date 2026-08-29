@@ -7,8 +7,8 @@ v3.0. See LICENSE.
 What is in this repo today (AGPLv3 — not closed source)
 ------------------------------------------------------
 The public tree already includes the guest leak calculator, full behavior
-linter, MT4/MT5 CSV parsers, rule-based coach, optional GPT path
-(`/api/coach`, `lib/ai`), session review, cloud persist (`lib/persist`,
+linter, MT4/MT5 CSV parsers, rule-based coach, optional LLM path
+(`/api/coach`, `lib/ai`, any OpenAI-compatible host), session review, cloud persist (`lib/persist`,
 `/api/run-audit`), and a Telegram helper (`lib/telegram`,
 `/api/webhook/telegram`, `/api/profile/telegram`). Those files are open.
 
@@ -27,5 +27,6 @@ When they exist, these live outside this AGPLv3 tree:
   - multi-tenant Academy (seats, student grading)
   - managed notification fleet (hosted Telegram/Discord at scale)
 
-Community self-host can still wire your own Supabase, OpenAI, and
-Telegram keys. That is not the same as the hosted Pro plan.
+Community self-host can still wire your own Supabase, any OpenAI-compatible
+LLM (OpenAI, OpenRouter, Ollama, …), and Telegram keys. That is not the same
+as the hosted Pro plan.

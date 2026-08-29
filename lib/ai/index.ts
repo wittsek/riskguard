@@ -9,4 +9,4 @@ export {
 } from './compact';
 export { buildRuleBasedCoaching } from './ruleBased';
 export { generateCoaching, type GenerateCoachingOptions } from './coach';
-export { generateLlmCoaching, hasOpenAiApiKey } from './llm';
+export { generateLlmCoaching, hasLlmApiKey, hasOpenAiApiKey, resolveLlmConfig } from './llm';

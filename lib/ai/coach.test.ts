@@ -124,17 +124,21 @@ describe('compactLintForCoach / parseCoachRequest', () => {
 });
 
 describe('generateCoaching', () => {
-  const originalKey = process.env.OPENAI_API_KEY;
+  const originalOpenAi = process.env.OPENAI_API_KEY;
+  const originalLlm = process.env.LLM_API_KEY;
 
   afterEach(() => {
-    if (originalKey === undefined) delete process.env.OPENAI_API_KEY;
-    else process.env.OPENAI_API_KEY = originalKey;
+    if (originalOpenAi === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = originalOpenAi;
+    if (originalLlm === undefined) delete process.env.LLM_API_KEY;
+    else process.env.LLM_API_KEY = originalLlm;
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
   it('uses the rule-based path when no API key is set', async () => {
     delete process.env.OPENAI_API_KEY;
+    delete process.env.LLM_API_KEY;
     const result = revengeAndMissingSlLint();
     const notes = await generateCoaching(result);
     expect(notes.source).toBe('rule');

@@ -141,7 +141,7 @@ export function SampleAuditView({ sample }: { sample: SampleAudit }) {
           <CardHeader>
             <CardTitle>This is a sample. Upload your CSV to audit your book.</CardTitle>
             <CardDescription>
-              Free leak calculator on the landing page. Pro is for saved history and the GPT coach.
+              Free leak calculator on the landing page. Pro is for saved history and hosted AI coaching.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">

@@ -1,5 +1,6 @@
 import type { CoachPayload, CoachingNotes } from '@/types';
 import { worstSession } from './compact';
+import { openRouterHeaders, resolveLlmConfig } from './provider';
 
 const SYSTEM_PROMPT = `You are RiskGuard AI, a behavioral trading coach for prop-firm traders.
 
@@ -60,26 +61,42 @@ function parseLlmJson(text: string): Pick<CoachingNotes, 'headline' | 'summary' 
   }
 }
 
-export function hasOpenAiApiKey(): boolean {
-  return Boolean(process.env.OPENAI_API_KEY?.trim());
-}
+export { hasLlmApiKey, hasOpenAiApiKey, resolveLlmConfig } from './provider';
 
 export async function generateLlmCoaching(payload: CoachPayload): Promise<CoachingNotes | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
+  const config = resolveLlmConfig();
+  if (!config) return null;
 
   const { default: OpenAI } = await import('openai');
-  const client = new OpenAI({ apiKey, timeout: 12_000, maxRetries: 0 });
-  const completion = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+  const client = new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: config.baseURL,
+    timeout: config.timeoutMs,
+    maxRetries: 0,
+    defaultHeaders: openRouterHeaders(config.baseURL),
+  });
+
+  const messages = [
+    { role: 'system' as const, content: SYSTEM_PROMPT },
+    { role: 'user' as const, content: userPrompt(payload) },
+  ];
+
+  const request = {
+    model: config.model,
     temperature: 0.4,
     max_tokens: 700,
-    response_format: { type: 'json_object' },
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userPrompt(payload) },
-    ],
-  });
+    messages,
+  };
+
+  let completion;
+  try {
+    completion = await client.chat.completions.create({
+      ...request,
+      response_format: { type: 'json_object' },
+    });
+  } catch {
+    completion = await client.chat.completions.create(request);
+  }
 
   const text = completion.choices[0]?.message?.content;
   if (!text) return null;

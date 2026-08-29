@@ -18,18 +18,18 @@ Clone it, Docker it, bring your own keys. Forever.
 
 - **Full behavior linter** — revenge trading, missing / removed SL, over-leverage, news window (when provided), discipline PnL, static prop-firm check
 - **CSV import** — MT4 and MT5 (also cTrader / Myfxbook when the headers match)
-- **Leak calculator** — guest, in the browser, no Supabase / OpenAI / Telegram
+- **Leak calculator** — guest, in the browser, no Supabase / LLM / Telegram
 - **Docker / self-host** — see below
-- Optional: your own Supabase (login + save), OpenAI (GPT coach), Telegram bot token
+- Optional: your own Supabase (login + save), any OpenAI-compatible LLM, Telegram bot token
 
-The rule-based coach always works without an API key. GPT is optional.
+The rule-based coach always works without an API key. An LLM is optional and not tied to OpenAI.
 
 ## Cloud Pro (hosted)
 
 [Login and go](https://getriskguard.com/register) on getriskguard.com. You do not run Docker.
 
 - Cloud save and audit history
-- **AI coaching quota in the plan** — you are not wiring your own OpenAI key
+- **AI coaching quota in the plan** — you are not wiring your own LLM key
 - Hosted Telegram alerts — no 24/7 server of your own
 - **$19/month or $149/year**, 14-day refund
 
@@ -49,7 +49,7 @@ Already here (AGPLv3, not pretend-closed):
 | --- | --- |
 | Linter + leak + static prop score | `lib/analytics` |
 | CSV parsers | `lib/parsers` |
-| Rule-based + optional GPT coach | `lib/ai`, `app/api/coach` |
+| Rule-based + optional LLM coach | `lib/ai`, `app/api/coach` |
 | Session review | `lib/review` |
 | Persist / saved audits | `lib/persist`, `app/api/run-audit` |
 | Telegram helper | `lib/telegram`, `app/api/webhook/telegram` |
@@ -73,7 +73,8 @@ Open [http://localhost:3000](http://localhost:3000). Drop a CSV or load the samp
 | Env | Required? | What it unlocks |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional | Login, cloud save |
-| `OPENAI_API_KEY` | Optional | GPT notes on `/api/coach` (else rule-based) |
+| `LLM_API_KEY` (or `OPENAI_API_KEY`) | Optional | LLM notes on `/api/coach` (else rule-based) |
+| `LLM_BASE_URL` + `LLM_MODEL` | Optional | Any OpenAI-compatible host (OpenRouter, Ollama, Groq, …). Required model if base URL is set. |
 | `TELEGRAM_BOT_TOKEN` | Optional | Alert after a saved audit + `/api/webhook/telegram` |
 
 Never commit `.env.local`. Restart the single `next dev` after changing env.
@@ -94,7 +95,24 @@ docker compose up --build
 
 Then [http://localhost:3000](http://localhost:3000).
 
-To add login / GPT / Telegram later, put keys in `.env.local` (or export them) and rebuild. `NEXT_PUBLIC_*` is baked at **build** time. Server-only keys (`OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`) are read at runtime.
+To add login / an LLM / Telegram later, put keys in `.env.local` (or export them) and rebuild. `NEXT_PUBLIC_*` is baked at **build** time. Server-only keys (`LLM_API_KEY`, `OPENAI_API_KEY`, `TELEGRAM_BOT_TOKEN`) are read at runtime.
+
+Examples (never commit real keys):
+
+```bash
+# OpenAI
+LLM_API_KEY=sk-...
+
+# OpenRouter + Ox Alpha
+LLM_API_KEY=sk-or-...
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=stealth/ox-alpha
+
+# Ollama
+LLM_API_KEY=ollama
+LLM_BASE_URL=http://127.0.0.1:11434/v1
+LLM_MODEL=llama3.1
+```
 
 ```bash
 docker compose up --build

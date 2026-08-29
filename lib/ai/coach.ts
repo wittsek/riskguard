@@ -1,6 +1,6 @@
 import type { CoachPayload, CoachingAccountContext, CoachingNotes, LintResult } from '@/types';
 import { compactLintForCoach, isCoachPayload, parseCoachRequest } from './compact';
-import { generateLlmCoaching, hasOpenAiApiKey } from './llm';
+import { generateLlmCoaching, hasLlmApiKey } from './llm';
 import { buildRuleBasedCoaching } from './ruleBased';
 
 export interface GenerateCoachingOptions {
@@ -25,7 +25,7 @@ export async function generateCoaching(
   const payload = toPayload(input, options.account);
   const fallback = buildRuleBasedCoaching(payload);
 
-  if (options.forceRuleBased || !hasOpenAiApiKey()) {
+  if (options.forceRuleBased || !hasLlmApiKey()) {
     return fallback;
   }
 
@@ -43,5 +43,5 @@ export {
   compactLintForCoach,
   parseCoachRequest,
   buildRuleBasedCoaching,
-  hasOpenAiApiKey,
+  hasLlmApiKey,
 };
