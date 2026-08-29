@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { hostedProGate } from '@/lib/billing';
 import { parseRunAuditAnnotations, parseRunAuditTrades } from '@/lib/persist/mapAuditToDb';
 import { persistLintedAudit } from '@/lib/persist/persistAudit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Sign in to save this audit.' }, { status: 401 });
   }
+
+  const gate = await hostedProGate(supabase, user.id);
+  if (gate) return gate;
 
   let body: unknown;
   try {

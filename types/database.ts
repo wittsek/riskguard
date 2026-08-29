@@ -22,6 +22,7 @@ export interface Database {
           id: string;
           full_name: string | null;
           telegram_chat_id: string | null;
+          stripe_customer_id: string | null;
           subscription_tier: SubscriptionTier;
           created_at: string;
         };
@@ -29,6 +30,7 @@ export interface Database {
           id: string;
           full_name?: string | null;
           telegram_chat_id?: string | null;
+          stripe_customer_id?: string | null;
           subscription_tier?: SubscriptionTier;
           created_at?: string;
         };
@@ -36,6 +38,7 @@ export interface Database {
           id?: string;
           full_name?: string | null;
           telegram_chat_id?: string | null;
+          stripe_customer_id?: string | null;
           subscription_tier?: SubscriptionTier;
           created_at?: string;
         };

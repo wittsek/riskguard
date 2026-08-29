@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { ManageBillingButton, UpgradeLink } from '@/components/billing/BillingButtons';
 import { TelegramAlertsCard } from '@/components/settings/TelegramAlertsCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PRICING_PATH } from '@/lib/pricing';
 import { useAuth } from '@/lib/auth/auth-context';
+import { isStripePublishableConfigured } from '@/lib/stripe/env';
 
 export default function SettingsPage() {
-  const { user, loading, configured } = useAuth();
+  const { user, loading, configured, isPro, subscriptionTier } = useAuth();
+  const stripeLive = isStripePublishableConfigured();
 
   if (loading) {
     return <p className="text-sm text-zinc-500">Loading account…</p>;
@@ -26,7 +29,7 @@ export default function SettingsPage() {
           <CardTitle>Account</CardTitle>
           <CardDescription>
             {configured
-              ? 'Signed-in audits persist to your Imported account.'
+              ? 'Cloud Pro persists audits to your Imported account. The browser calculator stays free.'
               : 'Add Supabase keys to enable sign-in and saved history.'}
           </CardDescription>
         </CardHeader>
@@ -36,10 +39,15 @@ export default function SettingsPage() {
               <Row label="Email" value={user.email ?? '—'} />
               <Row
                 label="Plan"
-                value="free"
+                value={isPro ? 'Cloud Pro' : (subscriptionTier ?? 'free')}
                 href={PRICING_PATH}
                 hrefLabel="See pricing"
               />
+              {stripeLive ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  {isPro ? <ManageBillingButton /> : <UpgradeLink />}
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-3">

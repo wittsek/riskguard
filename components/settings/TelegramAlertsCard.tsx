@@ -5,10 +5,13 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { UpgradeLink } from '@/components/billing/BillingButtons';
 import { useAuth } from '@/lib/auth/auth-context';
+import { isStripePublishableConfigured } from '@/lib/stripe/env';
 
 export function TelegramAlertsCard() {
-  const { user, loading, configured } = useAuth();
+  const { user, loading, configured, isPro } = useAuth();
+  const hostedPaywall = isStripePublishableConfigured();
   const [chatId, setChatId] = useState('');
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -84,6 +87,13 @@ export function TelegramAlertsCard() {
       <CardContent className="space-y-4 text-sm">
         {loading || !loaded ? (
           <p className="text-zinc-500">Loading alerts…</p>
+        ) : hostedPaywall && user && !isPro ? (
+          <div className="space-y-3">
+            <p className="text-zinc-400">
+              Hosted Telegram alerts are a Cloud Pro feature. The leak calculator stays free.
+            </p>
+            <UpgradeLink label="Upgrade to Pro for Telegram" />
+          </div>
         ) : !user ? (
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-zinc-400">Sign in to enable alerts.</p>

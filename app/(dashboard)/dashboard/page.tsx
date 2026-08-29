@@ -1,32 +1,80 @@
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DisciplineComparisonChart } from '@/components/charts/DisciplineComparisonChart';
 import { SessionWinRateChart, SessionWinRateLegend } from '@/components/charts/SessionWinRateChart';
+import { ManageBillingButton, UpgradeLink } from '@/components/billing/BillingButtons';
 import { AiCoachNotes } from '@/components/dashboard/AiCoachNotes';
 import { AuditToolbar } from '@/components/dashboard/AuditToolbar';
 import { EmptyAuditState } from '@/components/dashboard/EmptyAuditState';
 import { HabitLeakCards } from '@/components/dashboard/HabitLeakCards';
 import { PropReadinessGauge } from '@/components/dashboard/PropReadinessGauge';
 import { ShareAuditButton } from '@/components/share/ShareAuditButton';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useAuditSession } from '@/lib/store/audit-session';
+import { isStripePublishableConfigured } from '@/lib/stripe/env';
 import { formatMoney, formatPct } from '@/lib/utils';
+
+function UpgradedBanner() {
+  const searchParams = useSearchParams();
+  if (searchParams.get('upgraded') !== '1') return null;
+  return (
+    <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+      Welcome to Cloud Pro. Cloud save, hosted AI coaching, and Telegram alerts are unlocked. If
+      Settings still says Free, wait a moment and refresh — the Stripe webhook sets the plan.
+    </p>
+  );
+}
 
 export default function DashboardPage() {
   const { session, hydrated } = useAuditSession();
+  const { user, isPro } = useAuth();
+  const stripeLive = isStripePublishableConfigured();
 
   if (!hydrated) {
     return <p className="text-sm text-zinc-500">Loading session…</p>;
   }
 
   if (!session) {
-    return <EmptyAuditState title="Dashboard" />;
+    return (
+      <div className="space-y-6">
+        <Suspense fallback={null}>
+          <UpgradedBanner />
+        </Suspense>
+        {user && stripeLive ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm">
+            <p className="text-zinc-400">
+              {isPro
+                ? 'Cloud Pro — save, hosted AI, and Telegram are on.'
+                : 'Signed in on the free plan. This tab still holds the calculator; cloud save and hosted AI need Pro.'}
+            </p>
+            {isPro ? <ManageBillingButton /> : <UpgradeLink />}
+          </div>
+        ) : null}
+        <EmptyAuditState title="Dashboard" />
+      </div>
+    );
   }
 
   const { result } = session;
 
   return (
     <div className="space-y-8">
+      <Suspense fallback={null}>
+        <UpgradedBanner />
+      </Suspense>
+      {user && stripeLive ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 px-4 py-3 text-sm">
+          <p className="text-zinc-400">
+            {isPro
+              ? 'Cloud Pro — save, hosted AI, and Telegram are on.'
+              : 'Signed in on the free plan. This tab still holds the calculator; cloud save and hosted AI need Pro.'}
+          </p>
+          {isPro ? <ManageBillingButton /> : <UpgradeLink />}
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>

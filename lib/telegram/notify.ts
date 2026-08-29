@@ -1,4 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { isPro } from '@/lib/billing/pro';
+import { isStripeBillingConfigured } from '@/lib/stripe/env';
 import type { CoachingNotes, Database, LintResult } from '@/types';
 import { formatAuditAlertFromPersist } from './format';
 import { hasTelegramBotToken, sendTelegramMessage } from './send';
@@ -18,10 +20,12 @@ export async function notifySavedAudit(
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('telegram_chat_id')
+      .select('telegram_chat_id, subscription_tier')
       .eq('id', userId)
       .maybeSingle();
     if (error) return;
+
+    if (isStripeBillingConfigured() && !isPro(data?.subscription_tier)) return;
 
     const chatId = data?.telegram_chat_id?.trim();
     if (!chatId) return;

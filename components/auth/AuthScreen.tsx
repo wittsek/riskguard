@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { safeInternalPath, withNextParam } from '@/lib/auth/safeNext';
 import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { getAuthCallbackUrl } from '@/lib/supabase/siteUrl';
@@ -13,8 +14,23 @@ import { SupabaseSetupMessage } from './SupabaseSetupMessage';
 
 type Mode = 'login' | 'register';
 
-export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string }) {
+export function AuthScreen({
+  mode,
+  authError,
+  next,
+}: {
+  mode: Mode;
+  authError?: string;
+  next?: string;
+}) {
   const router = useRouter();
+  const afterAuth = safeInternalPath(next, '/dashboard');
+  const callbackUrl = (() => {
+    const base = getAuthCallbackUrl(process.env, typeof window !== 'undefined' ? window.location.origin : undefined);
+    if (!next) return base;
+    const safe = safeInternalPath(next, '');
+    return safe ? `${base}?next=${encodeURIComponent(safe)}` : base;
+  })();
   const configured = isSupabaseConfigured();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,7 +57,7 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push('/dashboard');
+        router.push(afterAuth);
         router.refresh();
         return;
       }
@@ -50,12 +66,12 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
         password,
         options: {
           data: fullName.trim() ? { full_name: fullName.trim() } : undefined,
-          emailRedirectTo: getAuthCallbackUrl(process.env, window.location.origin),
+          emailRedirectTo: callbackUrl,
         },
       });
       if (error) throw error;
       if (data.session) {
-        router.push('/dashboard');
+        router.push(afterAuth);
         router.refresh();
         return;
       }
@@ -82,7 +98,7 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: getAuthCallbackUrl(process.env, window.location.origin) },
+        options: { emailRedirectTo: callbackUrl },
       });
       if (error) throw error;
       setTone('ok');
@@ -162,14 +178,14 @@ export function AuthScreen({ mode, authError }: { mode: Mode; authError?: string
           {mode === 'login' ? (
             <>
               No account?{' '}
-              <Link href="/register" className="text-emerald-400 hover:underline">
+              <Link href={withNextParam('/register', next)} className="text-emerald-400 hover:underline">
                 Register
               </Link>
             </>
           ) : (
             <>
               Already registered?{' '}
-              <Link href="/login" className="text-emerald-400 hover:underline">
+              <Link href={withNextParam('/login', next)} className="text-emerald-400 hover:underline">
                 Sign in
               </Link>
             </>

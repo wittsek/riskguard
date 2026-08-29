@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { Check, Mail } from 'lucide-react';
+import { ProPlanCtas } from '@/components/pricing/ProPlanCtas';
 import { MarketingShell } from '@/components/layout/MarketingShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,6 @@ import {
   REFUND_DAYS,
   REFUND_PROMISE,
   SAMPLE_AUDIT_PATH,
-  SITE_DOMAIN,
   SUPPORT_EMAIL,
   academyWaitlistMailto,
   yearlyEquivalentMonthly,
@@ -50,8 +51,8 @@ export function PricingPage() {
             <a className="text-emerald-400 hover:underline" href={`mailto:${SUPPORT_EMAIL}`}>
               {SUPPORT_EMAIL}
             </a>{' '}
-            from the address you signed up with. No Stripe on this page yet; start free on{' '}
-            {SITE_DOMAIN} or clone the{' '}
+            from the address you signed up with. Stripe Checkout is live for Cloud Pro. Community
+            stays free — clone the{' '}
             <a className="text-emerald-400 hover:underline" href={GITHUB_REPO_URL}>
               AGPLv3 repo
             </a>
@@ -83,8 +84,12 @@ export function PricingPage() {
             description={`Or $${PRO_YEARLY_USD}/year (~$${yearlyEquivalentMonthly()}/mo, save $${yearlySavings()}). Login and go.`}
             features={PRO_FEATURES}
             highlight
-            cta={{ href: '/register', label: 'Sign up for Pro' }}
-            footnote={`${REFUND_DAYS}-day money-back. ${REFUND_PROMISE}`}
+            extra={
+              <Suspense fallback={<p className="text-sm text-zinc-500">Loading checkout…</p>}>
+                <ProPlanCtas />
+              </Suspense>
+            }
+            footnote={`${REFUND_DAYS}-day money-back. ${REFUND_PROMISE} Stripe handles the card — refunds are by email, not automatic.`}
           />
           <PlanCard
             tier="academy"

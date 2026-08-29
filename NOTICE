@@ -16,8 +16,10 @@ What the commercial product charges for
 ---------------------------------------
 Hosted convenience on getriskguard.com: login and go, managed cloud
 database, included LLM quota, and a hosted alert process so you do not
-run your own 24/7 server. Checkout and managed infra live on the hosted
-product, not as a crippled Community linter.
+run your own 24/7 server. Stripe Checkout / Customer Portal in this
+tree (`app/api/checkout`, `app/api/billing/portal`, `app/api/webhook/stripe`)
+is how Cloud Pro is billed. Community self-host without Stripe env
+vars is not paywalled — the linter stays free.
 
 What is not in this repo yet (future proprietary / hosted modules)
 -----------------------------------------------------------------

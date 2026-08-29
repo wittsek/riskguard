@@ -32,6 +32,7 @@ export interface Profile {
   id: string;
   full_name: string | null;
   telegram_chat_id: string | null;
+  stripe_customer_id: string | null;
   subscription_tier: SubscriptionTier;
   created_at: string;
 }
@@ -85,8 +86,9 @@ export interface AuditReport {
   created_at: string;
 }
 
-export type ProfileInsert = Omit<Profile, 'created_at' | 'subscription_tier'> & {
+export type ProfileInsert = Omit<Profile, 'created_at' | 'subscription_tier' | 'stripe_customer_id'> & {
   subscription_tier?: SubscriptionTier;
+  stripe_customer_id?: string | null;
 };
 
 export type TradingAccountInsert = Omit<TradingAccount, 'id' | 'created_at'> & {

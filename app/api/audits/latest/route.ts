@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { hostedProGate } from '@/lib/billing';
 import { loadLatestSavedAudit } from '@/lib/persist/persistAudit';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
@@ -21,6 +22,9 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: 'Sign in to load saved audits.' }, { status: 401 });
   }
+
+  const gate = await hostedProGate(supabase, user.id);
+  if (gate) return gate;
 
   try {
     const latest = await loadLatestSavedAudit(supabase, user);

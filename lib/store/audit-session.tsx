@@ -23,6 +23,7 @@ import { compactLintForCoach } from '@/lib/ai/compact';
 import { buildRuleBasedCoaching } from '@/lib/ai/ruleBased';
 import { lintTrades, defaultLintContext } from '@/lib/analytics';
 import { useAuth } from '@/lib/auth/auth-context';
+import { isStripePublishableConfigured } from '@/lib/stripe/env';
 import { explainParseFailure, parseTradeCsv } from '@/lib/parsers';
 import { SAMPLE_CSV, SAMPLE_CSV_FILENAME } from '@/lib/sample/sampleCsv';
 import { mergeAnnotationStore, readAnnotationStore } from '@/lib/store/trade-annotations';
@@ -113,7 +114,9 @@ function fromLatestPayload(payload: LatestAuditResponseBody): StoredAudit {
 }
 
 export function AuditSessionProvider({ children }: { children: React.ReactNode }) {
-  const { user, loading: authLoading, configured } = useAuth();
+  const { user, loading: authLoading, configured, isPro } = useAuth();
+  const hostedPaywall = isStripePublishableConfigured();
+  const canUseCloud = Boolean(configured && user && (!hostedPaywall || isPro));
   const [session, setSession] = useState<StoredAudit | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [error, setError] = useState<ParseFailure | null>(null);
@@ -208,8 +211,17 @@ export function AuditSessionProvider({ children }: { children: React.ReactNode }
           format: current.format,
         }),
       });
-      const data = (await response.json()) as Partial<RunAuditResponseBody> & { error?: string };
-      if (!response.ok) throw new Error(data.error ?? 'Could not save audit.');
+      const data = (await response.json()) as Partial<RunAuditResponseBody> & {
+        error?: string;
+        code?: string;
+        upgrade_url?: string;
+      };
+      if (!response.ok) {
+        if (data.code === 'pro_required') {
+          throw new Error(`${data.error ?? 'Cloud Pro required.'} See ${data.upgrade_url ?? '/pricing'}.`);
+        }
+        throw new Error(data.error ?? 'Could not save audit.');
+      }
       const next: StoredAudit = {
         ...current,
         savedReportId: data.reportId,
@@ -231,7 +243,12 @@ export function AuditSessionProvider({ children }: { children: React.ReactNode }
   const loadLatestSaved = useCallback(async () => {
     try {
       const response = await fetch('/api/audits/latest');
-      if (response.status === 401 || response.status === 404 || response.status === 503) {
+      if (
+        response.status === 401 ||
+        response.status === 402 ||
+        response.status === 404 ||
+        response.status === 503
+      ) {
         return null;
       }
       const data = (await response.json()) as LatestAuditResponseBody & { error?: string };
@@ -249,16 +266,16 @@ export function AuditSessionProvider({ children }: { children: React.ReactNode }
   }, [applySession]);
 
   useEffect(() => {
-    if (!hydrated || authLoading || !configured || !user) return;
+    if (!hydrated || authLoading || !canUseCloud) return;
     if (session) return;
     void loadLatestSaved();
-  }, [hydrated, authLoading, configured, user, session, loadLatestSaved]);
+  }, [hydrated, authLoading, canUseCloud, session, loadLatestSaved]);
 
   useEffect(() => {
-    if (!hydrated || authLoading || !configured || !user || !session) return;
+    if (!hydrated || authLoading || !canUseCloud || !session) return;
     if (session.savedReportId || persistStatus !== 'idle') return;
     void saveToAccount();
-  }, [hydrated, authLoading, configured, user, session, persistStatus, saveToAccount]);
+  }, [hydrated, authLoading, canUseCloud, session, persistStatus, saveToAccount]);
 
   useEffect(() => {
     if (!hydrated || !session || session.coachingStatus !== 'loading') return;

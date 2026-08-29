@@ -1,4 +1,4 @@
-/** Marketing prices and refund copy. No Stripe — CTAs go to /register, GitHub, or the calculator. */
+/** Marketing prices and refund copy. Hosted Checkout lives in /api/checkout. */
 
 export const SITE_DOMAIN = 'getriskguard.com';
 export const SUPPORT_EMAIL = 'hello@getriskguard.com';

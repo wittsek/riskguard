@@ -26,16 +26,18 @@ The rule-based coach always works without an API key. An LLM is optional and not
 
 ## Cloud Pro (hosted)
 
-[Login and go](https://getriskguard.com/register) on getriskguard.com. You do not run Docker.
+[Login and go](https://getriskguard.com/register) on getriskguard.com. You do not run Docker. Stripe Checkout is live.
 
 - Cloud save and audit history
 - **AI coaching quota in the plan** — you are not wiring your own LLM key
 - Hosted Telegram alerts — no 24/7 server of your own
-- **$19/month or $149/year**, 14-day refund
+- **$19/month or $149/year**, 14-day refund (email [hello@getriskguard.com](mailto:hello@getriskguard.com) — not an automatic Stripe refund)
+
+Signed-in **free** still gets the browser calculator (sessionStorage). Persist, load-latest, hosted LLM, and hosted Telegram need Pro. Guests need no login and no Stripe. Community self-host without Stripe env vars is not paywalled.
 
 **Pro roadmap (not in the code yet — do not treat as shipping):** live prop-firm buffer, live broker sync, Discord alerts.
 
-Copy lives on [`/pricing`](./app/pricing/page.tsx). Constants: [`lib/pricing.ts`](./lib/pricing.ts).
+Copy lives on [`/pricing`](./app/pricing/page.tsx). Constants: [`lib/pricing.ts`](./lib/pricing.ts). Checkout: [`app/api/checkout`](./app/api/checkout/route.ts). Webhook: [`app/api/webhook/stripe`](./app/api/webhook/stripe/route.ts).
 
 ## Academy
 
@@ -54,7 +56,7 @@ Already here (AGPLv3, not pretend-closed):
 | Persist / saved audits | `lib/persist`, `app/api/run-audit` |
 | Telegram helper | `lib/telegram`, `app/api/webhook/telegram` |
 
-**Not here yet:** live broker API, live prop linter, Discord sender, Academy seats/grading, Stripe checkout.
+**Not here yet:** live broker API, live prop linter, Discord sender, Academy seats/grading.
 
 The commercial bill is still for hosted convenience, managed LLM quota, and upcoming live infra — not for locking the linter.
 
@@ -77,6 +79,10 @@ Open [http://localhost:3000](http://localhost:3000). Drop a CSV or load the samp
 | `LLM_API_KEY` (or `OPENAI_API_KEY`) | Optional | LLM notes on `/api/coach` (else rule-based) |
 | `LLM_BASE_URL` + `LLM_MODEL` | Optional | Any OpenAI-compatible host (OpenRouter, Ollama, Groq, …). Required model if base URL is set. |
 | `TELEGRAM_BOT_TOKEN` | Optional | Alert after a saved audit + `/api/webhook/telegram` |
+| `STRIPE_SECRET_KEY` + `STRIPE_PRICE_MONTHLY` + `STRIPE_PRICE_YEARLY` | Optional | Hosted Cloud Pro Checkout. Empty = no paywall (self-host). |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Optional | Shows Checkout / Manage billing in the UI |
+| `STRIPE_WEBHOOK_SECRET` | Optional | Verifies `POST /api/webhook/stripe` (never expose to the client) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required with Stripe | Webhook writes `subscription_tier` / `stripe_customer_id`. Server only. |
 
 Never commit `.env.local`. Restart the single `next dev` after changing env.
 
@@ -86,6 +92,47 @@ On hosted login, set **Supabase → Authentication → URL configuration**:
 - Redirect URLs: `https://getriskguard.com/auth/callback`, `https://www.getriskguard.com/auth/callback` (if you use www), and optionally `http://localhost:3000/auth/callback` for local work
 
 Then add `NEXT_PUBLIC_SITE_URL=https://getriskguard.com` on Vercel and redeploy. Old emails that already contain `localhost:3000` will not change — request a new confirmation from https://getriskguard.com/register.
+
+## Stripe (Cloud Pro on getriskguard.com)
+
+Apply `supabase/migrations/20260829204500_profiles_stripe_billing.sql` on the hosted Supabase project.
+
+### Stripe Dashboard
+
+1. **Product** → add **Cloud Pro**.
+2. **Prices** (same product):
+   - Recurring **$19 / month** → copy the Price ID into `STRIPE_PRICE_MONTHLY` (`price_…`)
+   - Recurring **$149 / year** → copy the Price ID into `STRIPE_PRICE_YEARLY`
+3. **Developers → Webhooks → Add endpoint**
+   - URL: `https://getriskguard.com/api/webhook/stripe`
+   - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+   - Copy the endpoint signing secret into `STRIPE_WEBHOOK_SECRET` (`whsec_…`)
+4. **Settings → Billing → Customer portal** — enable it so “Manage billing” works (cancel / update card).
+5. Use **live** keys (`sk_live_…` / `pk_live_…`) on Vercel production. Test mode is only for local.
+
+### Vercel env vars
+
+| Name | Notes |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Server only |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Public, baked at build |
+| `STRIPE_WEBHOOK_SECRET` | Server only |
+| `STRIPE_PRICE_MONTHLY` | Live monthly price ID |
+| `STRIPE_PRICE_YEARLY` | Live yearly price ID |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only; never `NEXT_PUBLIC_` |
+| `NEXT_PUBLIC_SITE_URL` | `https://getriskguard.com` (Checkout success/cancel — never localhost in production) |
+
+Redeploy after adding `NEXT_PUBLIC_*`. Success URL is `/dashboard?upgraded=1`. Cancel URL is `/pricing`. Refunds stay email-only (`hello@getriskguard.com`).
+
+### Local test with Stripe CLI
+
+Keep **one** `next dev` on port 3000. In `.env.local` use **test** keys, test price IDs, `NEXT_PUBLIC_SITE_URL=http://localhost:3000`, and:
+
+```bash
+stripe listen --forward-to localhost:3000/api/webhook/stripe
+```
+
+Paste the CLI `whsec_…` into `STRIPE_WEBHOOK_SECRET` and restart that single Next process. Do not start a second `next dev`.
 
 ```bash
 npm test
