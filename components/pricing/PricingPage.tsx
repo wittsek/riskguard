@@ -1,10 +1,16 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Check, Clock } from 'lucide-react';
+import { Check, Mail } from 'lucide-react';
 import { MarketingShell } from '@/components/layout/MarketingShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  ACADEMY_FEATURES,
+  COMMUNITY_FEATURES,
+  GITHUB_REPO_URL,
+  OPEN_CORE_LABEL,
+  PRO_FEATURES,
   PRO_MONTHLY_USD,
   PRO_YEARLY_USD,
   REFUND_DAYS,
@@ -12,30 +18,10 @@ import {
   SAMPLE_AUDIT_PATH,
   SITE_DOMAIN,
   SUPPORT_EMAIL,
+  academyWaitlistMailto,
   yearlyEquivalentMonthly,
   yearlySavings,
 } from '@/lib/pricing';
-
-const FREE_FEATURES = [
-  'Leak calculator forever',
-  'One book in the browser',
-  'Share / export card',
-  'Rule-based coach',
-];
-
-const PRO_FEATURES = [
-  'Saved audit history',
-  'Multiple trading accounts',
-  'GPT coach (LLM notes)',
-  'Telegram alerts — coming soon',
-  'Priority import help',
-];
-
-const ACADEMY_FEATURES = [
-  'Coach and prop-firm desks',
-  'Shared playbooks and reviews',
-  'Team seats — details when we launch',
-];
 
 export function PricingPage() {
   return (
@@ -44,13 +30,13 @@ export function PricingPage() {
         <header className="space-y-4 text-center">
           <p className="text-sm uppercase tracking-[0.2em] text-emerald-400">Plans</p>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Free leak calculator. Pro when you want history.
+            Community is the full linter. Pro is login and go.
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-zinc-400">
-            Stay on <span className="text-zinc-200">free</span> as long as you like. Upgrade to{' '}
-            <span className="text-zinc-200">pro</span> for saved audits, multi-account, and the GPT
-            coach. <span className="text-zinc-200">academy</span> is coming later for coaches and
-            prop firms.
+            Self-host the auditor forever — CSV, Docker, your keys.{' '}
+            <span className="text-zinc-200">Cloud Pro</span> is hosted convenience and AI in the
+            bill, not a crippled Community. <span className="text-zinc-200">Academy</span> is seats
+            and student grading when it ships — waitlist only.
           </p>
         </header>
 
@@ -60,32 +46,41 @@ export function PricingPage() {
             <CardTitle className="text-2xl">{REFUND_PROMISE}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-zinc-400">
-            Honest Edgewonk-style guarantee — not a checkout trick. Email{' '}
+            Honest guarantee — not a checkout trick. Email{' '}
             <a className="text-emerald-400 hover:underline" href={`mailto:${SUPPORT_EMAIL}`}>
               {SUPPORT_EMAIL}
             </a>{' '}
             from the address you signed up with. No Stripe on this page yet; start free on{' '}
-            {SITE_DOMAIN} and upgrade when payments ship.
+            {SITE_DOMAIN} or clone the{' '}
+            <a className="text-emerald-400 hover:underline" href={GITHUB_REPO_URL}>
+              AGPLv3 repo
+            </a>
+            .
           </CardContent>
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <PlanCard
-            tier="free"
-            name="Free"
+            tier="community"
+            name="Community"
             price="$0"
             cadence="forever"
-            description="Run one book in the browser. No account required."
-            features={FREE_FEATURES}
+            description="Full linter, CSV, Docker / self-host. Your own API keys."
+            features={COMMUNITY_FEATURES}
             cta={{ href: '/', label: 'Start free' }}
+            extra={
+              <Button asChild variant="outline" className="w-full">
+                <a href={GITHUB_REPO_URL}>Clone on GitHub</a>
+              </Button>
+            }
           />
           <PlanCard
             tier="pro"
-            name="Pro"
+            name="Cloud Pro"
             price={`$${PRO_MONTHLY_USD}`}
             cadence="/ month"
-            badge="Most useful"
-            description={`Or $${PRO_YEARLY_USD}/year (~$${yearlyEquivalentMonthly()}/mo, save $${yearlySavings()}).`}
+            badge="Hosted + AI"
+            description={`Or $${PRO_YEARLY_USD}/year (~$${yearlyEquivalentMonthly()}/mo, save $${yearlySavings()}). Login and go.`}
             features={PRO_FEATURES}
             highlight
             cta={{ href: '/register', label: 'Sign up for Pro' }}
@@ -96,8 +91,11 @@ export function PricingPage() {
             name="Academy"
             price="Coming soon"
             cadence=""
-            description="For coaches and prop firms — not for sale yet."
+            description="Seats and student grading — not for sale yet."
             features={ACADEMY_FEATURES}
+            cta={{ href: academyWaitlistMailto(), label: 'Join the waitlist' }}
+            ctaExternal
+            footnote="Email only. No checkout, no fake buy button."
           />
         </div>
 
@@ -106,7 +104,11 @@ export function PricingPage() {
           <Link href={SAMPLE_AUDIT_PATH} className="text-emerald-400 hover:underline">
             Open the public sample audit
           </Link>{' '}
-          — no sign-up.
+          — no sign-up. {OPEN_CORE_LABEL} on{' '}
+          <a href={GITHUB_REPO_URL} className="text-emerald-400 hover:underline">
+            GitHub
+          </a>
+          .
         </p>
       </div>
     </MarketingShell>
@@ -123,17 +125,21 @@ function PlanCard({
   badge,
   highlight,
   cta,
+  ctaExternal,
+  extra,
   footnote,
 }: {
-  tier: 'free' | 'pro' | 'academy';
+  tier: 'community' | 'pro' | 'academy';
   name: string;
   price: string;
   cadence: string;
   description: string;
-  features: string[];
+  features: readonly string[];
   badge?: string;
   highlight?: boolean;
   cta?: { href: string; label: string };
+  ctaExternal?: boolean;
+  extra?: ReactNode;
   footnote?: string;
 }) {
   return (
@@ -160,15 +166,18 @@ function PlanCard({
           ))}
         </ul>
         {cta ? (
-          <Button asChild className="w-full">
-            <Link href={cta.href}>{cta.label}</Link>
+          <Button asChild className="w-full" variant={tier === 'academy' ? 'outline' : 'default'}>
+            {ctaExternal ? (
+              <a href={cta.href}>
+                {tier === 'academy' ? <Mail className="h-4 w-4" /> : null}
+                {cta.label}
+              </a>
+            ) : (
+              <Link href={cta.href}>{cta.label}</Link>
+            )}
           </Button>
-        ) : (
-          <Button variant="outline" className="w-full" disabled>
-            <Clock className="h-4 w-4" />
-            Coming soon
-          </Button>
-        )}
+        ) : null}
+        {extra}
         {footnote ? <p className="text-xs leading-relaxed text-zinc-500">{footnote}</p> : null}
       </CardContent>
     </Card>

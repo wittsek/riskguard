@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PRICING_PATH, SAMPLE_AUDIT_PATH } from '@/lib/pricing';
+import { GITHUB_REPO_URL, OPEN_CORE_LABEL, PRICING_PATH, SAMPLE_AUDIT_PATH } from '@/lib/pricing';
 import { AuthNav } from './AuthNav';
 
 export function MarketingHeader() {
@@ -25,6 +25,12 @@ export function MarketingHeader() {
           >
             MT4/MT5 import
           </Link>
+          <a
+            href={GITHUB_REPO_URL}
+            className="hidden text-xs text-zinc-500 hover:text-white lg:inline"
+          >
+            {OPEN_CORE_LABEL}
+          </a>
         </div>
         <AuthNav />
       </div>

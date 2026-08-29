@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import {
+  GITHUB_REPO_URL,
+  OPEN_CORE_LABEL,
   PRICING_PATH,
   REFUND_DAYS,
   SAMPLE_AUDIT_PATH,
@@ -15,10 +17,13 @@ export function MarketingFooter() {
             RiskGuard AI · {SITE_DOMAIN}
           </p>
           <p className="text-xs text-zinc-600">
-            {REFUND_DAYS}-day money-back on Pro. Leak calculator stays free.
+            {REFUND_DAYS}-day money-back on Pro. Community linter stays free.
           </p>
         </div>
         <nav className="flex flex-wrap items-center gap-4 text-xs text-zinc-400">
+          <a href={GITHUB_REPO_URL} className="hover:text-white">
+            {OPEN_CORE_LABEL}
+          </a>
           <Link href={PRICING_PATH} className="hover:text-white">
             Pricing
           </Link>

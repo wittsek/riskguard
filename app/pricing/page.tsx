@@ -4,7 +4,7 @@ import { SITE_DOMAIN } from '@/lib/pricing';
 
 export const metadata: Metadata = {
   title: 'Pricing | RiskGuard AI',
-  description: `Free leak calculator forever. Pro is $19/month or $149/year with a 14-day money-back guarantee. Academy coming soon. ${SITE_DOMAIN}`,
+  description: `Community is the full AGPL linter, CSV, and Docker. Cloud Pro is $19/month or $149/year with AI in the bill and a 14-day refund. Academy waitlist only. ${SITE_DOMAIN}`,
 };
 
 export default function PricingRoute() {

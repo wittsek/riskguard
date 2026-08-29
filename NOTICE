@@ -1,0 +1,31 @@
+RiskGuard (this public repository)
+Copyright (C) 2026 RiskGuard contributors
+
+This Community core is licensed under the GNU Affero General Public License
+v3.0. See LICENSE.
+
+What is in this repo today (AGPLv3 — not closed source)
+------------------------------------------------------
+The public tree already includes the guest leak calculator, full behavior
+linter, MT4/MT5 CSV parsers, rule-based coach, optional GPT path
+(`/api/coach`, `lib/ai`), session review, cloud persist (`lib/persist`,
+`/api/run-audit`), and a Telegram helper (`lib/telegram`,
+`/api/webhook/telegram`, `/api/profile/telegram`). Those files are open.
+
+What the commercial product charges for
+---------------------------------------
+Hosted convenience on getriskguard.com: login and go, managed cloud
+database, included LLM quota, and a hosted alert process so you do not
+run your own 24/7 server. Checkout and managed infra live on the hosted
+product, not as a crippled Community linter.
+
+What is not in this repo yet (future proprietary / hosted modules)
+-----------------------------------------------------------------
+When they exist, these live outside this AGPLv3 tree:
+
+  - live broker sync / live prop-firm buffer
+  - multi-tenant Academy (seats, student grading)
+  - managed notification fleet (hosted Telegram/Discord at scale)
+
+Community self-host can still wire your own Supabase, OpenAI, and
+Telegram keys. That is not the same as the hosted Pro plan.
